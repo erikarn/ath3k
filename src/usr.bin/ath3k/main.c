@@ -48,6 +48,9 @@
 
 #define	_DEFAULT_ATH3K_FIRMWARE_PATH	"/usr/share/firmware/ath3k/"
 
+int	ath3k_do_debug = 0;
+int	ath3k_do_info = 1;
+
 libusb_device *
 ath3k_find_device(libusb_context *ctx, int bus_id, int dev_id)
 {

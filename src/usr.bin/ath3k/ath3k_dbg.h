@@ -31,8 +31,11 @@
 #ifndef	__ATH3K_DEBUG_H__
 #define	__ATH3K_DEBUG_H__
 
-#define	ath3k_debug(...)	fprintf(stderr, __VA_ARGS__)
+extern	int ath3k_do_debug;
+extern	int ath3k_do_info;
+
+#define	ath3k_debug(...)	if (ath3k_do_debug) fprintf(stderr, __VA_ARGS__)
 #define	ath3k_err(...)		fprintf(stderr, __VA_ARGS__)
-#define	ath3k_info(...)		fprintf(stdout, __VA_ARGS__)
+#define	ath3k_info(...)		if (ath3k_do_info) fprintf(stdout, __VA_ARGS__)
 
 #endif

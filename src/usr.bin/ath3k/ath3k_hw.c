@@ -58,7 +58,7 @@ ath3k_load_fwfile(struct libusb_device_handle *hdl,
 
 	size = XMIN(count, FW_HDR_SIZE);
 
-	fprintf(stderr, "%s: file=%s, size=%d\n",
+	ath3k_debug("%s: file=%s, size=%d\n",
 	    __func__, fw->fwname, count);
 
 	/*
@@ -170,19 +170,19 @@ ath3k_load_patch(libusb_device_handle *hdl, const char *fw_path)
 
 	ret = ath3k_get_state(hdl, &fw_state);
 	if (ret < 0) {
-		fprintf(stderr, "%s: Can't get state\n", __func__);
+		ath3k_err("%s: Can't get state\n", __func__);
 		return (ret);
 	}
 
 	if (fw_state & ATH3K_PATCH_UPDATE) {
-		fprintf(stderr, "%s: Patch already downloaded\n",
+		ath3k_info("%s: Patch already downloaded\n",
 		    __func__);
 		return (0);
 	}
 
 	ret = ath3k_get_version(hdl, &fw_ver);
 	if (ret < 0) {
-		fprintf(stderr, "%s: Can't get version\n", __func__);
+		ath3k_debug("%s: Can't get version\n", __func__);
 		return (ret);
 	}
 
@@ -193,7 +193,7 @@ ath3k_load_patch(libusb_device_handle *hdl, const char *fw_path)
 
 	/* Read in the firmware */
 	if (ath3k_fw_read(&fw, fwname) <= 0) {
-		fprintf(stderr, "%s: ath3k_fw_read() failed\n",
+		ath3k_debug("%s: ath3k_fw_read() failed\n",
 		    __func__);
 		return (-1);
 	}
@@ -205,7 +205,7 @@ ath3k_load_patch(libusb_device_handle *hdl, const char *fw_path)
 	pt_ver.rom_version = *(int *)(fw.buf + fw.len - 8);
 	pt_ver.build_version = *(int *)(fw.buf + fw.len - 4);
 
-	fprintf(stderr, "%s: file %s: rom_ver=%d, build_ver=%d\n",
+	ath3k_info("%s: file %s: rom_ver=%d, build_ver=%d\n",
 	    __func__,
 	    fwname,
 	    (int) pt_ver.rom_version,
@@ -214,7 +214,7 @@ ath3k_load_patch(libusb_device_handle *hdl, const char *fw_path)
 	/* Check the ROM/build version against the firmware */
 	if ((pt_ver.rom_version != fw_ver.rom_version) ||
 	    (pt_ver.build_version <= fw_ver.build_version)) {
-		fprintf(stderr, "Patch file version mismatch!\n");
+		ath3k_debug("Patch file version mismatch!\n");
 		ath3k_fw_free(&fw);
 		return (-1);
 	}
@@ -237,19 +237,15 @@ ath3k_load_syscfg(libusb_device_handle *hdl, const char *fw_path)
 	struct ath3k_version fw_ver;
 	int clk_value, ret;
 
-	fprintf(stderr, "%s: called\n", __func__);
-
 	ret = ath3k_get_state(hdl, &fw_state);
 	if (ret < 0) {
-		fprintf(stderr,
-		    "Can't get state to change to load configuration err");
+		ath3k_err("Can't get state to change to load configuration err");
 		return (-EBUSY);
 	}
 
 	ret = ath3k_get_version(hdl, &fw_ver);
 	if (ret < 0) {
-		fprintf(stderr,
-		    "Can't get version to change to load ram patch err");
+		ath3k_err("Can't get version to change to load ram patch err");
 		return (ret);
 	}
 
@@ -274,13 +270,13 @@ ath3k_load_syscfg(libusb_device_handle *hdl, const char *fw_path)
 	    clk_value,
 	    ".dfu");
 
-	fprintf(stderr, "%s: syscfg file = %s\n",
+	ath3k_info("%s: syscfg file = %s\n",
 	    __func__,
 	    filename);
 
 	/* Read in the firmware */
 	if (ath3k_fw_read(&fw, filename) <= 0) {
-		fprintf(stderr, "%s: ath3k_fw_read() failed\n",
+		ath3k_err("%s: ath3k_fw_read() failed\n",
 		    __func__);
 		return (-1);
 	}
@@ -299,12 +295,16 @@ ath3k_set_normal_mode(libusb_device_handle *hdl)
 
 	ret = ath3k_get_state(hdl, &fw_state);
 	if (ret < 0) {
-		fprintf(stderr, "%s: can't get state\n", __func__);
+		ath3k_err("%s: can't get state\n", __func__);
 		return (ret);
 	}
 
+	/*
+	 * This isn't a fatal error - the device may have detached
+	 * already.
+	 */
 	if ((fw_state & ATH3K_MODE_MASK) == ATH3K_NORMAL_MODE) {
-		fprintf(stderr, "%s: firmware is already in normal mode\n",
+		ath3k_debug("%s: firmware is already in normal mode\n",
 		    __func__);
 		return (0);
 	}
@@ -319,8 +319,7 @@ ath3k_set_normal_mode(libusb_device_handle *hdl)
 	    1000);	/* XXX timeout */
 
 	if (ret < 0) {
-		fprintf(stderr,
-		    "%s: libusb_control_transfer() failed: code=%d\n",
+		ath3k_err("%s: libusb_control_transfer() failed: code=%d\n",
 		    __func__,
 		    ret);
 		return (0);
@@ -343,8 +342,7 @@ ath3k_switch_pid(libusb_device_handle *hdl)
 	    1000);	/* XXX timeout */
 
 	if (ret < 0) {
-		fprintf(stderr,
-		    "%s: libusb_control_transfer() failed: code=%d\n",
+		ath3k_debug("%s: libusb_control_transfer() failed: code=%d\n",
 		    __func__,
 		    ret);
 		return (0);
