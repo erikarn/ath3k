@@ -47,7 +47,7 @@ struct ath3k_firmware {
 	char *fwname;
 	int len;		/* firmware length */
 	int size;		/* buffer size */
-	char *buf;
+	unsigned char *buf;
 };
 
 extern	int ath3k_fw_read(struct ath3k_firmware *fw, const char *fwname);

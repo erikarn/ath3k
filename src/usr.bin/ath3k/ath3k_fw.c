@@ -47,8 +47,9 @@ ath3k_fw_read(struct ath3k_firmware *fw, const char *fwname)
 {
 	int fd;
 	struct stat sb;
-	char *buf;
-	int r, i;
+	unsigned char *buf;
+	ssize_t r;
+	int i;
 
 	fd = open(fwname, O_RDONLY);
 	if (fd < 0) {
@@ -83,7 +84,7 @@ ath3k_fw_read(struct ath3k_firmware *fw, const char *fwname)
 		fprintf(stderr, "%s: read len %d != file size %d\n",
 		    __func__,
 		    r,
-		    sb.st_size);
+		    (int) sb.st_size);
 		free(buf);
 		close(fd);
 		return (0);

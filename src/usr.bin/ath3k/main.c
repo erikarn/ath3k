@@ -136,6 +136,8 @@ ath3k_init_firmware(libusb_device_handle *hdl, const char *file_prefix)
 
 	/* free it */
 	ath3k_fw_free(&fw);
+
+	return (0);
 }
 
 /*

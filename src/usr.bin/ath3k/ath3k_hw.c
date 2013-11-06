@@ -95,7 +95,6 @@ ath3k_load_fwfile(struct libusb_device_handle *hdl,
 
 		if (ret < 0 || r != size) {
 			fprintf(stderr, "Can't load firmware: err=%d, size=%d\n",
-			    __func__,
 			    ret,
 			    size);
 			return (-1);
@@ -142,7 +141,7 @@ ath3k_get_version(struct libusb_device_handle *hdl,
 	    ATH3K_GETVERSION,
 	    0,
 	    0,
-	    (char *) version,
+	    (unsigned char *) version,
 	    sizeof(struct ath3k_version),
 	    1000);	/* XXX timeout */
 
