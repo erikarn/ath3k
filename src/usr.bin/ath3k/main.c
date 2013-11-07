@@ -166,7 +166,9 @@ parse_ugen_name(char const *ugen, uint8_t *bus, uint8_t *addr)
 static void
 usage(void)
 {
-	printf("usage goes here!\n");
+	fprintf(stderr,
+	    "Usage: ath3kfw -d ugenX.Y -f firmware path (-m <ar3012>)"
+	    " -p <product id> -v <vandor id>\n");
 	exit(127);
 }
 
