@@ -83,7 +83,7 @@ ath3k_fw_read(struct ath3k_firmware *fw, const char *fwname)
 	if (r != sb.st_size) {
 		fprintf(stderr, "%s: read len %d != file size %d\n",
 		    __func__,
-		    r,
+		    (int) r,
 		    (int) sb.st_size);
 		free(buf);
 		close(fd);
