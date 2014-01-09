@@ -49,7 +49,7 @@
 #define	_DEFAULT_ATH3K_FIRMWARE_PATH	"/usr/share/firmware/ath3k/"
 
 int	ath3k_do_debug = 0;
-int	ath3k_do_info = 1;
+int	ath3k_do_info = 0;
 
 libusb_device *
 ath3k_find_device(libusb_context *ctx, int bus_id, int dev_id)
@@ -60,9 +60,9 @@ ath3k_find_device(libusb_context *ctx, int bus_id, int dev_id)
 
 	cnt = libusb_get_device_list(ctx, &list);
 	if (cnt < 0) {
-		ath3k_err("%s: libusb_get_device_list() failed: code %d\n",
+		ath3k_err("%s: libusb_get_device_list() failed: code %lld\n",
 		    __func__,
-		    cnt);
+		    (long long int) cnt);
 		return (NULL);
 	}
 
@@ -167,8 +167,13 @@ static void
 usage(void)
 {
 	fprintf(stderr,
-	    "Usage: ath3kfw -d ugenX.Y -f firmware path (-m <ar3012>)"
-	    " -p <product id> -v <vandor id>\n");
+	    "Usage: ath3kfw (-D) -d ugenX.Y (-f firmware path) (-I)"
+	    " (-m <ar3012>) (-p <product id>) -v <vandor id>\n");
+	fprintf(stderr, "    -D: enable debugging\n");
+	fprintf(stderr, "    -d: device to operate upon\n");
+	fprintf(stderr, "    -f: firmware path, if not default\n");
+	fprintf(stderr, "    -I: enable informational output\n");
+	fprintf(stderr, "    -m: treat as AR3012\n");
 	exit(127);
 }
 
@@ -200,17 +205,22 @@ main(int argc, char *argv[])
 	libusb_set_debug(ctx, 3);
 
 	/* Parse command line arguments */
-	while ((n = getopt(argc, argv, "d:f:hm:p:v:")) != -1) {
+	while ((n = getopt(argc, argv, "Dd:f:hIm:p:v:")) != -1) {
 		switch (n) {
 		case 'd': /* ugen device name */
 			if (parse_ugen_name(optarg, &bus_id, &dev_id) < 0)
 				usage();
 			break;
-
+		case 'D':
+			ath3k_do_debug = 1;
+			break;
 		case 'f': /* firmware path */
 			if (firmware_path)
 				free(firmware_path);
 			firmware_path = strdup(optarg);
+			break;
+		case 'I':
+			ath3k_do_info = 1;
 			break;
 		case 'm':
 			if (strcmp(optarg, "ar3012") == 0) {
@@ -245,6 +255,8 @@ main(int argc, char *argv[])
 	}
 
 	/* XXX enforce that bInterfaceNumber is 0 */
+
+	/* XXX enforce the device/product id if they're non-zero */
 
 	/* Grab device handle */
 	r = libusb_open(dev, &hdl);
