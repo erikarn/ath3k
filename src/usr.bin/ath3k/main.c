@@ -249,7 +249,6 @@ main(int argc, char *argv[])
 	unsigned char state;
 	struct ath3k_version ver;
 	int r;
-	uint16_t dev_device_id = 0, dev_vendor_id = 0;
 	uint8_t bus_id = 0, dev_id = 0;
 	int n;
 	char *firmware_path = NULL;
@@ -284,12 +283,6 @@ main(int argc, char *argv[])
 			break;
 		case 'I':
 			ath3k_do_info = 1;
-			break;
-		case 'p': /* product id */
-			dev_device_id = strtol(optarg, NULL, 0);
-			break;
-		case 'v': /* vendor id */
-			dev_vendor_id = strtol(optarg, NULL, 0);
 			break;
 		case 'h':
 		default:
