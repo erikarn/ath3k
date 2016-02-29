@@ -1,8 +1,8 @@
-# $FreeBSD: head/usr.sbin/bluetooth/ath3kfw/Makefile 222772 2011-06-06 20:24:17Z ed $
+# $FreeBSD$
 
 CFLAGS+=	-g
-PROG=		ath3k
-#MAN=		ath3k.8
+PROG=		ath3kfw
+#MAN=		ath3kfw.8
 DPADD+=		${LIBUSB}
 LDADD+=		-lusb
 NO_MAN=		yes
