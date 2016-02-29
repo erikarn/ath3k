@@ -231,12 +231,11 @@ usage(void)
 {
 	fprintf(stderr,
 	    "Usage: ath3kfw (-D) -d ugenX.Y (-f firmware path) (-I)"
-	    " (-m <ar3012>) (-p <product id>) -v <vandor id>\n");
+	    " (-p <product id>) -v <vandor id>\n");
 	fprintf(stderr, "    -D: enable debugging\n");
 	fprintf(stderr, "    -d: device to operate upon\n");
 	fprintf(stderr, "    -f: firmware path, if not default\n");
 	fprintf(stderr, "    -I: enable informational output\n");
-	fprintf(stderr, "    -m: treat as AR3012\n");
 	exit(127);
 }
 
@@ -285,11 +284,6 @@ main(int argc, char *argv[])
 			break;
 		case 'I':
 			ath3k_do_info = 1;
-			break;
-		case 'm':
-			if (strcmp(optarg, "ar3012") == 0) {
-				is_3012 = 1;
-			}
 			break;
 		case 'p': /* product id */
 			dev_device_id = strtol(optarg, NULL, 0);
