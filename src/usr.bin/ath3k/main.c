@@ -52,8 +52,8 @@ int	ath3k_do_debug = 0;
 int	ath3k_do_info = 0;
 
 struct ath3k_devid {
-	int product_id;
-	int vendor_id;
+	uint16_t product_id;
+	uint16_t vendor_id;
 	int is_3012;
 };
 
