@@ -250,6 +250,7 @@ main(int argc, char *argv[])
 	struct ath3k_version ver;
 	int r;
 	uint8_t bus_id = 0, dev_id = 0;
+	int devid_set = 0;
 	int n;
 	char *firmware_path = NULL;
 	int is_3012 = 0;
@@ -270,6 +271,7 @@ main(int argc, char *argv[])
 	while ((n = getopt(argc, argv, "Dd:f:hIm:p:v:")) != -1) {
 		switch (n) {
 		case 'd': /* ugen device name */
+			devid_set = 1;
 			if (parse_ugen_name(optarg, &bus_id, &dev_id) < 0)
 				usage();
 			break;
@@ -290,6 +292,12 @@ main(int argc, char *argv[])
 			break;
 			/* NOT REACHED */
 		}
+	}
+
+	/* Ensure the devid was given! */
+	if (devid_set == 0) {
+		usage();
+		/* NOTREACHED */
 	}
 
 	ath3k_debug("%s: opening dev %d.%d\n",
