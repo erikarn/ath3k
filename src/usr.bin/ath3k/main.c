@@ -37,8 +37,8 @@
 #include <err.h>
 #include <fcntl.h>
 #include <libgen.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/param.h>
 
 #include <libusb.h>
 
@@ -50,6 +50,79 @@
 
 int	ath3k_do_debug = 0;
 int	ath3k_do_info = 0;
+
+struct ath3k_devid {
+	int product_id;
+	int vendor_id;
+	int is_3012;
+};
+
+static struct ath3k_devid ath3k_list[] = {
+
+	/* Atheros AR3012 with sflash firmware*/
+	{ .vendor_id = 0x0489, .product_id = 0xe04e, .is_3012 = 1 },
+	{ .vendor_id = 0x0489, .product_id = 0xe04d, .is_3012 = 1 },
+	{ .vendor_id = 0x0489, .product_id = 0xe056, .is_3012 = 1 },
+	{ .vendor_id = 0x0489, .product_id = 0xe057, .is_3012 = 1 },
+	{ .vendor_id = 0x0489, .product_id = 0xe05f, .is_3012 = 1 },
+	{ .vendor_id = 0x04c5, .product_id = 0x1330, .is_3012 = 1 },
+	{ .vendor_id = 0x04ca, .product_id = 0x3004, .is_3012 = 1 },
+	{ .vendor_id = 0x04ca, .product_id = 0x3005, .is_3012 = 1 },
+	{ .vendor_id = 0x04ca, .product_id = 0x3006, .is_3012 = 1 },
+	{ .vendor_id = 0x04ca, .product_id = 0x3008, .is_3012 = 1 },
+	{ .vendor_id = 0x04ca, .product_id = 0x300b, .is_3012 = 1 },
+	{ .vendor_id = 0x0930, .product_id = 0x0219, .is_3012 = 1 },
+	{ .vendor_id = 0x0930, .product_id = 0x0220, .is_3012 = 1 },
+	{ .vendor_id = 0x0b05, .product_id = 0x17d0, .is_3012 = 1 },
+	{ .vendor_id = 0x0CF3, .product_id = 0x0036, .is_3012 = 1 },
+	{ .vendor_id = 0x0cf3, .product_id = 0x3004, .is_3012 = 1 },
+	{ .vendor_id = 0x0cf3, .product_id = 0x3005, .is_3012 = 1 },
+	{ .vendor_id = 0x0cf3, .product_id = 0x3008, .is_3012 = 1 },
+	{ .vendor_id = 0x0cf3, .product_id = 0x311D, .is_3012 = 1 },
+	{ .vendor_id = 0x0cf3, .product_id = 0x311E, .is_3012 = 1 },
+	{ .vendor_id = 0x0cf3, .product_id = 0x311F, .is_3012 = 1 },
+	{ .vendor_id = 0x0cf3, .product_id = 0x3121, .is_3012 = 1 },
+	{ .vendor_id = 0x0CF3, .product_id = 0x817a, .is_3012 = 1 },
+	{ .vendor_id = 0x0cf3, .product_id = 0xe004, .is_3012 = 1 },
+	{ .vendor_id = 0x0cf3, .product_id = 0xe005, .is_3012 = 1 },
+	{ .vendor_id = 0x0cf3, .product_id = 0xe003, .is_3012 = 1 },
+	{ .vendor_id = 0x13d3, .product_id = 0x3362, .is_3012 = 1 },
+	{ .vendor_id = 0x13d3, .product_id = 0x3375, .is_3012 = 1 },
+	{ .vendor_id = 0x13d3, .product_id = 0x3393, .is_3012 = 1 },
+	{ .vendor_id = 0x13d3, .product_id = 0x3402, .is_3012 = 1 },
+
+	/* Atheros AR5BBU22 with sflash firmware */
+	{ .vendor_id = 0x0489, .product_id = 0xE036, .is_3012 = 1 },
+	{ .vendor_id = 0x0489, .product_id = 0xE03C, .is_3012 = 1 },
+};
+
+static int
+ath3k_is_3012(struct libusb_device *dev)
+{
+	int i;
+	struct libusb_device_descriptor d;
+
+	/* Get the device descriptor for this device entry */
+	i = libusb_get_device_descriptor(dev, &d);
+	if (i != 0) {
+		warn("%s: libusb_get_device_descriptor: %s\n",
+		    __func__,
+		    libusb_strerror(i));
+		return (0);
+	}
+
+	/* Search looking for whether it's an AR3012 */
+	for (i = 0; i < nitems(ath3k_list); i++) {
+		if ((ath3k_list[i].product_id == d.idProduct) &&
+		    (ath3k_list[i].vendor_id == d.idVendor)) {
+			fprintf(stderr, "%s: found AR3012\n", __func__);
+			return (ath3k_list[i].is_3012);
+		}
+	}
+
+	/* Not found */
+	return (0);
+}
 
 libusb_device *
 ath3k_find_device(libusb_context *ctx, int bus_id, int dev_id)
@@ -252,6 +325,11 @@ main(int argc, char *argv[])
 		ath3k_err("%s: device not found\n", __func__);
 		/* XXX cleanup? */
 		exit(1);
+	}
+
+	/* See if its an AR3012 */
+	if (ath3k_is_3012(dev)) {
+		is_3012 = 1;
 	}
 
 	/* XXX enforce that bInterfaceNumber is 0 */

@@ -85,6 +85,10 @@ ath3k_load_fwfile(struct libusb_device_handle *hdl,
 	/* Load in the rest of the data */
 	while (count) {
 		size = XMIN(count, BULK_SIZE);
+		ath3k_debug("%s: transferring %d bytes, offset %d\n",
+		    __func__,
+		    sent,
+		    size);
 
 		ret = libusb_bulk_transfer(hdl,
 		    0x2,
