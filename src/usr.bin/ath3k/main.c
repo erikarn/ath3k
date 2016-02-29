@@ -97,24 +97,14 @@ static struct ath3k_devid ath3k_list[] = {
 };
 
 static int
-ath3k_is_3012(struct libusb_device *dev)
+ath3k_is_3012(struct libusb_device_descriptor *d)
 {
 	int i;
-	struct libusb_device_descriptor d;
-
-	/* Get the device descriptor for this device entry */
-	i = libusb_get_device_descriptor(dev, &d);
-	if (i != 0) {
-		warn("%s: libusb_get_device_descriptor: %s\n",
-		    __func__,
-		    libusb_strerror(i));
-		return (0);
-	}
 
 	/* Search looking for whether it's an AR3012 */
 	for (i = 0; i < nitems(ath3k_list); i++) {
-		if ((ath3k_list[i].product_id == d.idProduct) &&
-		    (ath3k_list[i].vendor_id == d.idVendor)) {
+		if ((ath3k_list[i].product_id == d->idProduct) &&
+		    (ath3k_list[i].vendor_id == d->idVendor)) {
 			fprintf(stderr, "%s: found AR3012\n", __func__);
 			return (ath3k_list[i].is_3012);
 		}
@@ -253,6 +243,7 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
+	struct libusb_device_descriptor d;
 	libusb_context *ctx;
 	libusb_device *dev;
 	libusb_device_handle *hdl;
@@ -327,9 +318,26 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
+	/* Get the device descriptor for this device entry */
+	r = libusb_get_device_descriptor(dev, &d);
+	if (r != 0) {
+		warn("%s: libusb_get_device_descriptor: %s\n",
+		    __func__,
+		    libusb_strerror(r));
+		exit(1);
+	}
+
 	/* See if its an AR3012 */
-	if (ath3k_is_3012(dev)) {
+	if (ath3k_is_3012(&d)) {
 		is_3012 = 1;
+
+		/* If it's bcdDevice > 1, don't attach */
+		if (d.bcdDevice > 0x0001) {
+			ath3k_debug("%s: AR3012; bcdDevice=%d, exiting\n",
+			    __func__,
+			    d.bcdDevice);
+			exit(0);
+		}
 	}
 
 	/* XXX enforce that bInterfaceNumber is 0 */
