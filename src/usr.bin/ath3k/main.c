@@ -102,7 +102,7 @@ ath3k_is_3012(struct libusb_device_descriptor *d)
 	int i;
 
 	/* Search looking for whether it's an AR3012 */
-	for (i = 0; i < nitems(ath3k_list); i++) {
+	for (i = 0; i < (int) nitems(ath3k_list); i++) {
 		if ((ath3k_list[i].product_id == d->idProduct) &&
 		    (ath3k_list[i].vendor_id == d->idVendor)) {
 			fprintf(stderr, "%s: found AR3012\n", __func__);
@@ -114,12 +114,11 @@ ath3k_is_3012(struct libusb_device_descriptor *d)
 	return (0);
 }
 
-libusb_device *
+static libusb_device *
 ath3k_find_device(libusb_context *ctx, int bus_id, int dev_id)
 {
 	libusb_device **list, *dev = NULL, *found = NULL;
 	ssize_t cnt, i;
-	int err = 0;
 
 	cnt = libusb_get_device_list(ctx, &list);
 	if (cnt < 0) {

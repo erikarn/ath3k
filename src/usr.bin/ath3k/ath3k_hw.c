@@ -36,6 +36,7 @@
 #include <string.h>
 #include <err.h>
 #include <fcntl.h>
+#include <sys/endian.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -51,7 +52,7 @@ int
 ath3k_load_fwfile(struct libusb_device_handle *hdl,
     const struct ath3k_firmware *fw)
 {
-	int err, len, size, count, sent = 0;
+	int size, count, sent = 0;
 	int ret, r;
 
 	count = fw->len;
@@ -170,6 +171,7 @@ ath3k_load_patch(libusb_device_handle *hdl, const char *fw_path)
 	struct ath3k_version fw_ver, pt_ver;
 	char fwname[FILENAME_MAX];
 	struct ath3k_firmware fw;
+	uint32_t tmp;
 
 	ret = ath3k_get_state(hdl, &fw_state);
 	if (ret < 0) {
@@ -204,9 +206,10 @@ ath3k_load_patch(libusb_device_handle *hdl, const char *fw_path)
 	/*
 	 * Extract the ROM/build version from the patch file.
 	 */
-	/* XXX endian? */
-	pt_ver.rom_version = *(int *)(fw.buf + fw.len - 8);
-	pt_ver.build_version = *(int *)(fw.buf + fw.len - 4);
+	memcpy(&tmp, fw.buf + fw.len - 8, sizeof(tmp));
+	pt_ver.rom_version = le32toh(tmp);
+	memcpy(&tmp, fw.buf + fw.len - 4, sizeof(tmp));
+	pt_ver.build_version = le32toh(tmp);
 
 	ath3k_info("%s: file %s: rom_ver=%d, build_ver=%d\n",
 	    __func__,
